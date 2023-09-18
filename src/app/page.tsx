@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@nextui-org/button";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Divider } from "@nextui-org/divider";
+import Area from "../components/Area";
 import type { Bot } from "@/interfaces/Bot";
 import type { Order, OrderType } from "@/interfaces/Order";
 
@@ -18,19 +18,7 @@ export default function Home() {
   const pendingNormalOrders = pendingOrders.filter(
     (order) => order.type === "Normal"
   );
-  const displayOrders = orders
-    .filter(
-      (order) => order.status === "PENDING" || order.status === "PROCESSING"
-    )
-    .sort((a, b) => {
-      if (a.type === "VIP" && b.type === "Normal") {
-        return -1; // VIP orders should come first
-      } else if (a.type === "Normal" && b.type === "VIP") {
-        return 1; // Normal orders should come after VIP orders
-      } else {
-        return 0; // Keep the existing order if types are the same
-      }
-    });
+  const displayOrders = [...pendingVIPOrders, ...pendingNormalOrders];
   const completedOrders = orders.filter(
     (order) => order.status === "COMPLETED"
   );
@@ -155,46 +143,34 @@ export default function Home() {
     <main className='flex min-h-screen flex-col items-center justify-between p-24'>
       <h1 className='text-xl font-bold'>McDonald Order Controller</h1>
       <div className='min-w-full grid grid-cols-4 md:grid-cols-12 gap-4 justify-evenly items-center'>
-        <Card className='col-span-4 h-[50vh]'>
-          <CardHeader className='flex gap-3'>Pending Area</CardHeader>
-          <Divider />
-          <CardBody>
-            {displayOrders.map((e) => {
-              return (
-                <p key={`order-${e.id}`} color='black'>
-                  {`Order No.${e.id}`} - {e.type} - {e.status}
-                </p>
-              );
-            })}
-          </CardBody>
-        </Card>
-        <Card className='col-span-4 h-[50vh]'>
-          <CardHeader className='flex gap-3'>Bots Area</CardHeader>
-          <Divider />
-          <CardBody>
-            {bots.map((e) => {
-              return (
-                <p key={`bot-${e.id}`} color='black'>
-                  {`Bot ${e.id}`} - {e.status}
-                  {e.order && ` - Processing: Order No.${e.order.id}`}
-                </p>
-              );
-            })}
-          </CardBody>
-        </Card>
-        <Card className='col-span-4 h-[50vh]'>
-          <CardHeader className='flex gap-3'>Completed Area</CardHeader>
-          <Divider />
-          <CardBody>
-            {completedOrders.map((e) => {
-              return (
-                <p key={`order-${e.id}`} color='black'>
-                  {`Order No.${e.id}`} - {e.type} - {e.status}
-                </p>
-              );
-            })}
-          </CardBody>
-        </Card>
+        <Area title='Pending Area'>
+          {displayOrders.map((e) => {
+            return (
+              <p key={`order-${e.id}`} color='black'>
+                {`Order No.${e.id}`} - {e.type} - {e.status}
+              </p>
+            );
+          })}
+        </Area>
+        <Area title='Bot Processing Area'>
+          {bots.map((e) => {
+            return (
+              <p key={`bot-${e.id}`} color='black'>
+                {`Bot ${e.id}`} - {e.status}
+                {e.order && ` - Processing: Order No.${e.order.id}`}
+              </p>
+            );
+          })}
+        </Area>
+        <Area title='Completed Area'>
+          {completedOrders.map((e) => {
+            return (
+              <p key={`order-${e.id}`} color='black'>
+                {`Order No.${e.id}`} - {e.type} - {e.status}
+              </p>
+            );
+          })}
+        </Area>
       </div>
       <Divider className='bg-black my-2' />
       <div className='mb-32 flex flex-wrap justify-center place-items-center gap-2 text-center md:max-w-5xl md:w-full md:mb-0 md:text-left'>
